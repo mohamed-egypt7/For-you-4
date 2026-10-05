@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - إدارة الروابط</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #161b22;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #30363d;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f0f6fc;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #8b949e;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #58a6ff;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>لوحة التحكم الإدارية</h2>
+    
+    <div class="form-group">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="ghToken" placeholder="أدخل توكن جيت هاب هنا">
+    </div>
+
+    <div class="form-group">
+        <label>اسم الشخص / المفتاح (Key)</label>
+        <input type="text" id="personName" placeholder="مثال: ahmed">
+    </div>
+
+    <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="text" id="personPass" placeholder="كلمة المرور الخاصة به">
+    </div>
+
+    <div class="form-group">
+        <label>رابط الأغنية أو الصفحة المباشر (اختياري)</label>
+        <input type="text" id="personLink" placeholder="https://...">
+    </div>
+
+    <button onclick="saveData()">إنشاء ورفع البيانات وتليجرام</button>
+    <div class="status" id="statusMsg"></div>
+</div>
+
+<script>
+    // استرجاع التوكن المحفوظ مسبقاً في المتصفح
+    document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+
+    async function saveData() {
+        const token = document.getElementById('ghToken').value.trim();
+        const name = document.getElementById('personName').value.trim();
+        const password = document.getElementById('personPass').value.trim();
+        const link = document.getElementById('personLink').value.trim();
+        const statusMsg = document.getElementById('statusMsg');
+
+        if (!token || !name || !password) {
+            statusMsg.style.color = '#f85149';
+            statusMsg.innerText = 'الرجاء ملء حقل التوكن، الاسم، وكلمة المرور!';
+            return;
+        }
+
+        // حفظ التوكن محلياً لتوفير الوقت
+        localStorage.setItem('gh_token', token);
+
+        statusMsg.style.color = '#58a6ff';
+        statusMsg.innerText = 'جاري الاتصال بجيت هاب وتحديث قاعدة البيانات...';
+
+        const owner = 'mohamed-egypt7';
+        const repo = 'For-you-';
+        const path = 'db.json';
+        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+        try {
+            // 1. جلب الملف الحالي من جيت هاب لمعرفة الـ SHA
+            let response = await fetch(url, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+
+            let sha = '';
+            let dbData = {};
+
+            if (response.ok) {
+                let fileInfo = await response.json();
+                sha = fileInfo.sha;
+                let decodedContent = decodeURIComponent(escape(atob(fileInfo.content)));
+                dbData = JSON.parse(decodedContent);
+            } else if (response.status !== 404) {
+                throw new Error('فشل جلب ملف db.json من جيت هاب، تأكد من التوكن وصلاحياته.');
+            }
+
+            // 2. تحديث البيانات بالاسم الجديد
+            dbData[name] = {
+                password: password,
+                link: link || ''
+            };
+
+            // 3. إعادة رفع الملف المحدث إلى جيت هاب
+            let encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(dbData, null, 2))));
+            
+            let putResponse = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: `Add/Update ${name} via Web Admin Panel`,
+                    content: encodedContent,
+                    sha: sha ? sha : undefined
+                })
+            });
+
+            if (!putResponse.ok) {
+                let errDetails = await putResponse.json();
+                throw new Error('فشل الرفع لجيت هاب: ' + (errDetails.message || putResponse.statusText));
+            }
+
+            // 4. إرسال نسخة احتياطية وتنبيه عبر بوت تيليجرام (بالشات آي دي الصحيح 8718173410)
+            const botToken = '8882621676:AAFNQ0B3q6rPSMTIujyIHGYiep9xNM1rgZU';
+            const chatId = '8718173410';
+            const telegramMsg = `🚀 *تمت إضافة مستخدم جديد بنجاح!*\n\n👤 *الاسم:* ${name}\n🔑 *الباسورد:* ${password}\n🔗 *الرابط:* ${link || 'لا يوجد'}`;
+            
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: telegramMsg,
+                    parse_mode: 'Markdown'
+                })
+            }).catch(e => console.log('Telegram notice failed:', e));
+
+            statusMsg.style.color = '#3fb950';
+            statusMsg.innerText = '✅ تم تحديث النظام وإرسال الباك أب لتليجرام بنجاح!';
+            
+            // تفريغ الحقول بعد النجاح
+            document.getElementById('personName').value = '';
+            document.getElementById('personPass').value = '';
+            document.getElementById('personLink').value = '';
+
+        } catch (error) {
+            statusMsg.style.color = '#f85149';
+            statusMsg.innerText = '❌ خطأ: ' + error.message;
+        }
+    }
+</script>
+
+</body>
+</html>

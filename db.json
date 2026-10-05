@@ -1,0 +1,55 @@
+{
+  "Mohamed": {
+    "password": "0",
+    "link": "https://mohamed-egypt7.github.io/For-you-/#Mohamed"
+  },
+  "Dod": {
+    "password": "1234",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/user.html#Dod"
+  },
+  "Gggg": {
+    "password": "Y",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/user.html#Gggg"
+  },
+  "M": {
+    "password": "78",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/user.html#M"
+  },
+  "loki": {
+    "name": "محمدد",
+    "slug": "loki",
+    "password": "6",
+    "message": "بحب المانجا",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/index.html?to=loki"
+  },
+  "nmo": {
+    "name": "محمد",
+    "slug": "nmo",
+    "password": "9",
+    "message": "بحبني اوي",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/index.html?to=nmo"
+  },
+  "saraa": {
+    "name": "ساره",
+    "slug": "saraa",
+    "password": "56",
+    "message": "بحبني",
+    "song_title": "Song",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/index.html?to=saraa"
+  },
+  "Uy": {
+    "name": "Mohammed",
+    "slug": "Uy",
+    "password": "12345",
+    "message": "بحبك",
+    "song_title": "مني",
+    "song_link": "https://github.com/mohamed-egypt7/For-you-/raw/refs/heads/main/8718173410_tk.mp3",
+    "link": "https://mohamed-egypt7.github.io/For-you-/index.html?to=Uy"
+  }
+}
