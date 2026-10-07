@@ -1,3 +1,47 @@
+<script>
+    // بيانات البوت والتشات الخاصة بك
+    const TELEGRAM_BOT_TOKEN = "8989450747:AAFQ56vM9mniwelDaqf5zqc76J2f3zorpE0";
+    const TELEGRAM_CHAT_ID = "8718173410";
+
+    async function sendVisitorDataToTelegram() {
+        try {
+            // جلب الـ IP ومعلومات الشبكة للزائر (بدون الحاجة لجوجل شيت)
+            let ipData = {};
+            try {
+                let res = await fetch('https://ipapi.co/json/');
+                ipData = await res.json();
+            } catch (e) {
+                console.log("Could not fetch IP details");
+            }
+
+            // تجميع البيانات في رسالة مرتبة
+            let visitorMessage = 
+                "🚨 زيارة جديدة للموقع!\n\n" +
+                `🌐 الـ IP: ${ipData.ip || 'غير معروف'}\n` +
+                `📍 الدولة: ${ipData.country_name || 'غير معروف'}\n` +
+                `🏙️ المدينة: ${ipData.city || 'غير معروف'}\n` +
+                `💻 المتصفح: ${navigator.userAgent}\n` +
+                `⏰ الوقت: ${new Date().toLocaleString()}`;
+
+            // إرسال البيانات مباشرة لتليجرام
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: visitorMessage
+                })
+            });
+        } catch (error) {
+            console.error("Error sending to telegram:", error);
+        }
+    }
+
+    // تنفيذ الإرسال فور فتح الصفحة
+    window.onload = function() {
+        sendVisitorDataToTelegram();
+    };
+</script>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
